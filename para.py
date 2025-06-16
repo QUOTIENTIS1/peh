@@ -5,10 +5,10 @@ import requests
 import json
 
 # --- 1. Initialize InferenceClient ---
-api_token = "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"  # Your new API key
+api_token = "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"  # Your API key, used publicly as requested
 client = InferenceClient(
     token=api_token,
-    model="microsoft/Phi-3-mini-4k-instruct"
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1"  # Switched to a more accessible model
 )
 
 # --- 2. Initialize Session State ---
@@ -102,6 +102,7 @@ def response_generator(prompt):
         # Stream the response chunks
         full_response = ""
         for chunk in completion:
+            print(f"Raw Chunk: {chunk}")  # Debug: Log raw chunk
             if chunk.choices and chunk.choices[0].delta.content:
                 chunk_content = chunk.choices[0].delta.content
                 full_response += chunk_content
@@ -110,7 +111,7 @@ def response_generator(prompt):
         st.session_state.user_data["messages"].append({"role": "assistant", "content": full_response})
                 
     except Exception as e:
-        print(f"Exception: {str(e)}")  # Debug: Print to console
+        print(f"Exception: {str(e)}")  # Debug: Log exception
         yield f"🚫 Error: {str(e)}"
 
 # --- 6. Main App Flow ---
@@ -136,4 +137,7 @@ else:
             
         # Display assistant response
         with st.chat_message("assistant"):
-            st.write_stream(response_generator(prompt))
+            response = st.write_stream(response_generator(prompt))
+            # Ensure response is a string for history
+            response_str = "".join(response) if isinstance(response, (list, tuple)) else response
+            st.session_state.user_data["messages"].append({"role": "assistant", "content": response_str})
