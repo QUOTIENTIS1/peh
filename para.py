@@ -8,7 +8,7 @@ import json
 api_token = "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"  # Your API key, used publicly as requested
 client = InferenceClient(
     token=api_token,
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1"  # Accessible model
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1"  # Try this model first
 )
 
 # --- 2. Initialize Session State ---
@@ -88,15 +88,23 @@ def show_gender_selection():
 # --- 5. Chatbot Functionality ---
 def response_generator(prompt):
     try:
+        # Validate and sanitize prompt
+        if not prompt or not isinstance(prompt, str):
+            yield "🚫 Error: Invalid prompt"
+            return
+
         # Prepare message history with system context
         messages = [
-            {"role": "system", "content": f"You are a helpful assistant chatting with a {st.session_state.user_data['gender']} user."}
-        ] + st.session_state.user_data["messages"] + [{"role": "user", "content": prompt}]
-        
+            {"role": "system", "content": f"You are a helpful assistant chatting with a {st.session_state.user_data['gender']} user."},
+            {"role": "user", "content": prompt.strip()}  # Simplified to user prompt only
+        ]
+        print(f"Sending Messages: {messages}")  # Debug: Log payload
+
         # Get streaming response
         completion = client.chat_completion(
             messages=messages,
-            stream=True
+            stream=True,
+            max_tokens=500  # Limit response length
         )
         
         # Stream the response chunks
