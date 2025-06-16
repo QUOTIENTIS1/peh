@@ -8,7 +8,7 @@ import json
 api_token = "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"  # Your API key, used publicly as requested
 client = InferenceClient(
     token=api_token,
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1"  # Switched to a more accessible model
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1"  # Accessible model
 )
 
 # --- 2. Initialize Session State ---
